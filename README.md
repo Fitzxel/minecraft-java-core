@@ -1,6 +1,4 @@
-![logo](https://raw.githubusercontent.com/Luuxis/minecraft-java-core/main/logo.png)
-
-##### v4.0.0 • **minecraft‑java‑core**
+##### v4 • **minecraft‑java‑core**
 [![License: CC‑BY‑NC 4.0](https://img.shields.io/badge/License-CC--BY--NC%204.0-yellow.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 ![stable version](https://img.shields.io/badge/stable_version-4.0.0-blue)
 
