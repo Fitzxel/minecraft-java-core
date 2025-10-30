@@ -1,8 +1,6 @@
 /**
- * This code is distributed under the CC-BY-NC 4.0 license:
- * https://creativecommons.org/licenses/by-nc/4.0/
- *
- * Original author: Luuxis
+ * @author Luuxis
+ * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 
 import { EventEmitter } from 'events';
@@ -152,6 +150,12 @@ export type LaunchOPTS = {
 	 * How many concurrent downloads can be in progress at once.
 	 */
 	downloadFileMultiple?: number,
+	/**
+	 * Should the launcher bypass offline mode?
+	 * 
+	 * If `true`, the launcher will not check if the user is online.
+	 */
+	bypassOffline?: boolean,
 	intelEnabledMac?: boolean,
 	/**
 	 * Loader config
@@ -208,6 +212,7 @@ export default class Launch extends EventEmitter {
 			detached: false,
 			intelEnabledMac: false,
 			downloadFileMultiple: 5,
+			bypassOffline: false,
 
 			loader: {
 				path: './loader',
@@ -259,6 +264,7 @@ export default class Launch extends EventEmitter {
 		if (this.options.downloadFileMultiple < 1) this.options.downloadFileMultiple = 1
 		if (this.options.downloadFileMultiple > 30) this.options.downloadFileMultiple = 30
 		if (typeof this.options.loader.path !== 'string') this.options.loader.path = `./loader/${this.options.loader.type}`;
+		if (this.options.java.version && typeof this.options.java.type !== 'string') this.options.java.type = 'jre';
 		this.start();
 	}
 
@@ -308,7 +314,7 @@ export default class Launch extends EventEmitter {
 			return this.emit('error', InfoVersion);
 		}
 		let { json, version } = InfoVersion;
-		
+
 		let libraries = new librariesMinecraft(this.options)
 		let bundle = new bundleMinecraft(this.options)
 		let java = new javaMinecraft(this.options)

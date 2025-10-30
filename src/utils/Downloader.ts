@@ -1,13 +1,11 @@
 /**
- * This code is distributed under the CC-BY-NC 4.0 license:
- * https://creativecommons.org/licenses/by-nc/4.0/
- *
- * Original author: Luuxis
+ * @author Luuxis
+ * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 
 import fs from 'fs';
 import { EventEmitter } from 'events';
-import { Readable } from 'stream';
+import { fromAnyReadable } from './Index.js';
 
 /**
  * Describes a single file to be downloaded by the Downloader class.
@@ -52,7 +50,7 @@ export default class Downloader extends EventEmitter {
 		let downloaded = 0;
 
 		return new Promise<void>((resolve, reject) => {
-			const body = Readable.fromWeb(response.body as any);
+			const body = fromAnyReadable(response.body as any);
 
 			body.on('data', (chunk: Buffer) => {
 				downloaded += chunk.length;
@@ -133,7 +131,7 @@ export default class Downloader extends EventEmitter {
 
 				clearTimeout(timeoutId);
 
-				const stream = Readable.fromWeb(response.body as any);
+				const stream = fromAnyReadable(response.body as any);
 
 				stream.on('data', (chunk: Buffer) => {
 					downloaded += chunk.length;

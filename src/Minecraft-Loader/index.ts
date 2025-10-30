@@ -1,8 +1,6 @@
 /**
- * This code is distributed under the CC-BY-NC 4.0 license:
- * https://creativecommons.org/licenses/by-nc/4.0/
- *
- * Original author: Luuxis
+ * @author Luuxis
+ * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 
 import { EventEmitter } from 'events';
@@ -156,40 +154,30 @@ export default class Loader extends EventEmitter {
 		const installer: any = await forge.downloadInstaller(LoaderData);
 		if (installer.error) return installer; // e.g., { error: "..." }
 
-		// 2. If the installer extension is ".jar", we do the standard "install_profile.json" approach
-		if ("ext" in installer && installer.ext === 'jar') {
-			const profile: any = await forge.extractProfile(installer.filePath);
-			if (profile.error) return profile;
+		const profile: any = await forge.extractProfile(installer.filePath);
+		if (profile.error) return profile;
 
-			// Write the version JSON to disk
+		// Write the version JSON to disk
+		if ("version" in profile && "id" in profile.version) {
 			const destination = path.resolve(this.options.path, 'versions', profile.version.id);
 			if (!fs.existsSync(destination)) fs.mkdirSync(destination, { recursive: true });
 			fs.writeFileSync(path.resolve(destination, `${profile.version.id}.json`), JSON.stringify(profile.version, null, 4));
-
-			// 3. Extract universal jar if needed
-			const universal: any = await forge.extractUniversalJar(profile.install, installer.filePath);
-			if (universal.error) return universal;
-
-			// 4. Download libraries
-			const libraries: any = await forge.downloadLibraries(profile, universal);
-			if (libraries.error) return libraries;
-
-			// 5. Patch Forge if necessary
-			const patch: any = await forge.patchForge(profile.install);
-			if (patch.error) return patch;
-
-			return profile.version;
-		} else {
-			// For older Forge, create a merged jar
-			const profile = await forge.createProfile(installer.id, installer.filePath);
-			if (profile.error) return profile;
-
-			const destination = path.resolve(this.options.path, 'versions', profile.id);
-			if (!fs.existsSync(destination)) fs.mkdirSync(destination, { recursive: true });
-			fs.writeFileSync(path.resolve(destination, `${profile.id}.json`), JSON.stringify(profile, null, 4));
-
-			return profile;
+			fs.cpSync(path.resolve(this.options.loader.config.minecraftJar), path.resolve(destination, `${profile.version.id}.jar`));
 		}
+
+		// 3. Extract universal jar if needed
+		const universal: any = await forge.extractUniversalJar(profile.install, installer.filePath);
+		if (universal.error) return universal;
+
+		// 4. Download libraries
+		const libraries: any = await forge.downloadLibraries(profile, universal);
+		if (libraries.error) return libraries;
+
+		// 5. Patch Forge if necessary
+		const patch: any = await forge.patchForge(profile.install);
+		if (patch.error) return patch;
+
+		return profile.version;
 	}
 
 	/**
@@ -229,6 +217,7 @@ export default class Loader extends EventEmitter {
 			const destination = path.resolve(this.options.path, 'versions', profile.version.id);
 			if (!fs.existsSync(destination)) fs.mkdirSync(destination, { recursive: true });
 			fs.writeFileSync(path.resolve(destination, `${profile.version.id}.json`), JSON.stringify(profile.version, null, 4));
+			fs.cpSync(path.resolve(this.options.loader.config.minecraftJar), path.resolve(destination, `${profile.version.id}.jar`));
 		}
 		// Extract universal jar
 		const universal: any = await neoForge.extractUniversalJar(profile.install, installer.filePath, installer.oldAPI);
@@ -269,6 +258,7 @@ export default class Loader extends EventEmitter {
 			const destination = path.resolve(this.options.path, 'versions', json.id);
 			if (!fs.existsSync(destination)) fs.mkdirSync(destination, { recursive: true });
 			fs.writeFileSync(path.resolve(destination, `${json.id}.json`), JSON.stringify(json, null, 4));
+			fs.cpSync(path.resolve(this.options.loader.config.minecraftJar), path.resolve(destination, `${json.id}.jar`));
 		}
 
 		if ("libraries" in json) {
@@ -302,6 +292,7 @@ export default class Loader extends EventEmitter {
 			const destination = path.resolve(this.options.path, 'versions', json.id);
 			if (!fs.existsSync(destination)) fs.mkdirSync(destination, { recursive: true });
 			fs.writeFileSync(path.resolve(destination, `${json.id}.json`), JSON.stringify(json, null, 4));
+			fs.cpSync(path.resolve(this.options.loader.config.minecraftJar), path.resolve(destination, `${json.id}.jar`));
 		}
 		if ("libraries" in json) {
 			await legacyFabric.downloadLibraries(json);
@@ -333,6 +324,7 @@ export default class Loader extends EventEmitter {
 			const destination = path.resolve(this.options.path, 'versions', json.id);
 			if (!fs.existsSync(destination)) fs.mkdirSync(destination, { recursive: true });
 			fs.writeFileSync(path.resolve(destination, `${json.id}.json`), JSON.stringify(json, null, 4));
+			fs.cpSync(path.resolve(this.options.loader.config.minecraftJar), path.resolve(destination, `${json.id}.jar`));
 		}
 		if ("libraries" in json) {
 			await quilt.downloadLibraries(json);

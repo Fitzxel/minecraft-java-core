@@ -1,12 +1,11 @@
 /**
- * This code is distributed under the CC-BY-NC 4.0 license:
- * https://creativecommons.org/licenses/by-nc/4.0/
- *
- * Original author: Luuxis
+ * @author Luuxis
+ * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 
 import fs from 'fs';
 import os from 'os';
+import semver from 'semver';
 import { getPathLibraries, isold } from '../utils/Index.js';
 
 /**
@@ -26,6 +25,8 @@ export interface LaunchOptions {
 	path: string;              // Base path to Minecraft data folder
 	instance?: string;         // Instance name (if using multi-instance approach)
 	authenticator: any;        // Auth object containing tokens, user info, etc.
+	version?: string;         // Minecraft version
+	bypassOffline?: boolean;   // Bypass offline mode for multiplayer
 	memory: {
 		min?: string;             // Minimum memory (e.g. "512M", "1G")
 		max?: string;             // Maximum memory (e.g. "4G", "8G")
@@ -243,6 +244,14 @@ export default class MinecraftArguments {
 			}
 		}
 
+		// bypass offline mode multiplayer
+		if (this.options?.bypassOffline) {
+			jvmArgs.push('-Dminecraft.api.auth.host=https://nope.invalid/');
+			jvmArgs.push('-Dminecraft.api.account.host=https://nope.invalid/');
+			jvmArgs.push('-Dminecraft.api.session.host=https://nope.invalid/');
+			jvmArgs.push('-Dminecraft.api.services.host=https://nope.invalid/');
+		}
+
 		// If natives are specified, add the native library path
 		if (versionJson.nativesList) {
 			jvmArgs.push(`-Djava.library.path=${this.options.path}/versions/${versionJson.id}/natives`);
@@ -288,16 +297,21 @@ export default class MinecraftArguments {
 		const map = new Map();
 
 		for (const dep of combinedLibraries) {
-			const parts = dep.name.split(":");
-			const key = parts.slice(0, 2).join(":");
-			const classifier = parts[3] ? parts[3] : "";
-			const versionKey = `${key}:${classifier}`;
+			const parts = getPathLibraries(dep.name);
+			const version = semver.valid(semver.coerce(parts.version));
+			if (!version) continue;
 
-			const current = map.get(versionKey);
-			const version = parts[2];
+			const pathParts = parts.path.split('/');
+			const basePath = pathParts.slice(0, -1).join('/');
 
-			if (!current || version > current.name.split(":")[2]) {
-				map.set(versionKey, dep);
+			const key = `${basePath}/${parts.name.replace(`-${parts.version}`, '')}`;
+			const current = map.get(key);
+
+			const isSupportedVersion = semver.satisfies(semver.valid(semver.coerce(this.options.version)), '1.14.4 - 1.18.2');
+			const isWindows = process.platform === 'win32';
+
+			if (!current || semver.gt(version, current.version) && (isSupportedVersion && isWindows)) {
+				map.set(key, { ...dep, version });
 			}
 		}
 

@@ -1,8 +1,6 @@
 /**
- * This code is distributed under the CC-BY-NC 4.0 license:
- * https://creativecommons.org/licenses/by-nc/4.0/
- *
- * Original author: Luuxis
+ * @author Luuxis
+ * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 
 import fs from 'fs';
@@ -114,7 +112,7 @@ export default class NeoForgeMC extends EventEmitter {
 		// If none found, fallback to the new API approach
 		if (!versions.length) {
 			const splitted = this.options.loader.version.split('.');
-			const shortVersion = `${splitted[1]}.${splitted[2] || 0}`;
+			const shortVersion = `${splitted[1]}.${splitted[2] || 0}.`;
 			versions = metaData.versions.filter((v: string) => v.startsWith(shortVersion));
 			oldAPI = false;
 		}
@@ -145,7 +143,7 @@ export default class NeoForgeMC extends EventEmitter {
 		}
 
 		// Create a local folder for "neoForge" if it doesn't exist
-		const neoForgeFolder = path.resolve(this.options.path, 'neoForge');
+		const neoForgeFolder = path.resolve(this.options.path, 'libraries/net/neoforged/installer');
 		const installerFilePath = path.resolve(neoForgeFolder, `neoForge-${build}-installer.jar`);
 
 		if (!fs.existsSync(installerFilePath)) {
