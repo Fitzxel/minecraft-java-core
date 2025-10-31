@@ -1,6 +1,10 @@
+# minecraft-java-core (Fork)
+
+> Fork del proyecto original [minecraft-java-core](https://github.com/luuxis/minecraft-java-core) por Luuxis
+
 ##### v4 • **minecraft‑java‑core**
 [![License: CC‑BY‑NC 4.0](https://img.shields.io/badge/License-CC--BY--NC%204.0-yellow.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
-![stable version](https://img.shields.io/npm/v/minecraft-java-core?logo=nodedotjs)
+![stable version](https://img.shields.io/npm/v/@fitzxel/minecraft-java-core?logo=nodedotjs)
 
 **minecraft‑java‑core** is a **NodeJS/TypeScript** solution for launching both vanilla *and* modded Minecraft Java Edition without juggling JSON manifests, assets, libraries or Java runtimes yourself. Think of it as the *core* of an Electron/NW.js/CLI launcher.
 
@@ -135,7 +139,7 @@ let mc
 
 Below is the complete **default** `LaunchOptions` object returned by
 `minecraft‑java‑core` when you don’t override any field. Use it as a quick
-reference for every available parameter and its default value.  
+reference for every available parameter and its default value.
 (Parameters marked *nullable* can be left `null`/`undefined` and the library
 will figure out sane values.)
 
