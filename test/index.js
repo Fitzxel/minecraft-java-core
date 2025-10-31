@@ -1,55 +1,108 @@
-const { Launch, Microsoft } = require('minecraft-java-core');
+const {
+  Launch,
+  Microsoft,
+  checkInternet,
+  Mojang,
+} = require("minecraft-java-core");
+const prompt = require("prompt");
 const launcher = new Launch();
 
-const fs = require('fs');
-let mc
+const fs = require("fs");
+const accJson = "./test/account.json";
+let mc;
+
+const client_id = "7ae13d13-d132-462b-8619-bfb13246a563";
+const client_secret = "";
 
 (async () => {
-    if (!fs.existsSync('./account.json')) {
-        mc = await new Microsoft().getAuth();
-        fs.writeFileSync('./account.json', JSON.stringify(mc, null, 4));
-    } else {
-        mc = JSON.parse(fs.readFileSync('./account.json'));
-        if (!mc.refresh_token) {
-            mc = await new Microsoft().getAuth();
-            fs.writeFileSync('./account.json', JSON.stringify(mc, null, 4));
-        } else {
-            mc = await new Microsoft().refresh(mc);
-            fs.writeFileSync('./account.json', JSON.stringify(mc, null, 4));
-            if (mc.error) process.exit(1);
-        }
+  const internet = await checkInternet();
+  const ms = internet
+    ? new Microsoft(client_id, undefined, undefined, client_secret)
+    : null;
+
+  if (!fs.existsSync(accJson)) {
+    mc = await ms.getAuth("raw");
+    fs.writeFileSync(accJson, JSON.stringify(mc, null, 4));
+  } else {
+    mc = JSON.parse(fs.readFileSync(accJson));
+    if (!mc.refresh_token) {
+      mc = await ms.getAuth("raw");
+      fs.writeFileSync(accJson, JSON.stringify(mc, null, 4));
+    } else if (internet) {
+      mc = await ms.refresh(mc);
+      if (mc.error) mc = await ms.getAuth("raw");
+      fs.writeFileSync(accJson, JSON.stringify(mc, null, 4));
     }
+  }
 
-    const opt = {
-        url: "https://luuxcraft.fr/api/user/48c74227-13d1-48d6-931b-0f12b73da340/instance",
-        path: './minecraft',
-        authenticator: mc,
-        version: '1.8.9',
-        intelEnabledMac: true,
-        instance: "Hypixel",
+  if (mc) {
+    console.log("[#] Authenticated as:", mc.name);
+  } else {
+    console.log("[#] Using offline mode.");
+    prompt.start();
+    const { username } = await prompt.get(["username"]);
+    mc = await Mojang.login(username);
+  }
 
-        ignored: [
-            "config",
-            "logs",
-            "resourcepacks",
-            "options.txt",
-            "optionsof.txt"
-        ],
+  launcher.config({
+    path: "./test/minecraft",
+    authenticator: mc,
+    version: "latest_release",
+    intelEnabledMac: true,
+    instance: "test-instance",
+    loader: {
+      type: "forge",
+      build: "latest",
+      enable: false,
+    },
+    memory: {
+      min: "2G",
+      max: "4G",
+    },
+    java: {
+      path: null,
+      version: process.argv.includes("--java-version")
+        ? process.argv[process.argv.indexOf("--java-version") + 1]
+        : null,
+      type: "jre",
+    },
+    detached: process.argv.includes("--detached"),
+  });
 
-        loader: {
-            type: 'forge',
-            build: 'latest',
-            enable: true
-        },
-        memory: {
-            min: '14G',
-            max: '16G'
-        },
-    };
+  launcher
+    .on("progress", (progress, size, element) =>
+      console.log(
+        `[Game DL]: ${element} - ${((progress / size) * 100).toFixed(2)}%`,
+      ),
+    )
+    .on("patch", (patch) => process.stdout.write(`[Game Patch]: ${patch}`))
+    .on("data", (line) => process.stdout.write(`[Game Data]: ${line}`))
+    .on("error", (error) => console.error(`[Game Error]: ${error.message}`))
+    .on("close", (code) => {
+      console.log(`[Game]: exited with code ${code}.`);
+      process.exit(0);
+    });
 
-    launcher.Launch(opt);
-    launcher.on('progress', (progress, size) => console.log(`[DL] ${((progress / size) * 100).toFixed(2)}%`));
-    launcher.on('patch', pacth => process.stdout.write(pacth));
-    launcher.on('data', line => process.stdout.write(line));
-    launcher.on('error', err => console.error(err));
+  if (process.argv.includes("--only-download")) {
+    console.log("[#] Starting download only...");
+    await launcher.downloadGame();
+
+    console.log("[#] Game download completed. Exiting...");
+    process.exit(0);
+  } else {
+    const mcProcess = await launcher.start();
+    console.log(`
+            ---------- Minecraft launched ----------
+        [#] Minecraft launched successfully! PID: ${mcProcess.pid}
+            ----------------------------------------
+        `);
+
+    if (process.argv.includes("--auto-close")) {
+      console.log("[#] Auto-closing Minecraft in 20 seconds...");
+      setTimeout(() => {
+        console.log("[#] Minecraft closed automatically...");
+        mcProcess.kill();
+      }, 20000);
+    }
+  }
 })();

@@ -7,7 +7,6 @@ import { EventEmitter } from "events";
 import path from "path";
 import fs from "fs";
 import { spawn } from "child_process";
-import https from "https";
 
 import jsonMinecraft from "./Minecraft/Minecraft-Json.js";
 import librariesMinecraft from "./Minecraft/Minecraft-Libraries.js";
@@ -16,6 +15,7 @@ import loaderMinecraft from "./Minecraft/Minecraft-Loader.js";
 import javaMinecraft from "./Minecraft/Minecraft-Java.js";
 import bundleMinecraft from "./Minecraft/Minecraft-Bundle.js";
 import argumentsMinecraft from "./Minecraft/Minecraft-Arguments.js";
+import checkInternet from "./utils/checkInternet.js";
 
 import { isold } from "./utils/Index.js";
 import Downloader from "./utils/Downloader.js";
@@ -135,7 +135,7 @@ export type LaunchOPTS = {
    *
    * Example: `'1.20.4'`
    */
-  version: string;
+  version: "latest_release" | string;
   /**
    * Path to instance directory. Relative to absolute path to Minecraft's root directory (config option `path`).
    * This separates game files (e.g. versions, libraries, assets) from game data (e.g. worlds, resourcepacks, options).
@@ -153,6 +153,7 @@ export type LaunchOPTS = {
   downloadFileMultiple?: number;
   /**
    * Should the launcher bypass offline mode?
+   * This fixes multiplayer mode disabled in offline mode.
    *
    * If `true`, the launcher will not check if the user is online.
    */
@@ -293,20 +294,7 @@ export default class Launch extends EventEmitter {
       : this.options.path;
     let savePath = path.join(saveDir, "gameData.json");
 
-    // Check internet connection
-    const hasInternet = await new Promise((resolve) => {
-      try {
-        https
-          .get("https://www.google.com", (res) => {
-            resolve(true);
-          })
-          .on("error", () => {
-            resolve(false);
-          });
-      } catch {
-        resolve(false);
-      }
-    });
+    const hasInternet = await checkInternet();
 
     if (!hasInternet) {
       // If there's no internet and the file exists, load it
