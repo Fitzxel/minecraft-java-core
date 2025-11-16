@@ -164,7 +164,7 @@ export type LaunchOPTS = {
    */
   loader: loader;
   /**
-   * MCPathcer directory. (idk actually luuxis please verify this)
+   * MCPathcer directory.
    *
    * If `instance` if set, relative to it.
    * If `instance` is `undefined`, relative to `path`.
@@ -175,7 +175,7 @@ export type LaunchOPTS = {
    */
   verify: boolean;
   /**
-   * Files to ignore from instance. (idk actually luuxis please verify this)
+   * Files to skip on verification process.
    */
   ignored: string[];
   /**
@@ -204,7 +204,7 @@ export default class Launch extends EventEmitter {
   options: LaunchOPTS;
   private gameData: any = null; // Store downloaded game data
 
-  async config(opt: LaunchOPTS) {
+  async config(opt: Partial<LaunchOPTS>) {
     const defaultOptions: LaunchOPTS = {
       url: null,
       authenticator: null,

@@ -3,7 +3,7 @@ const {
   Microsoft,
   checkInternet,
   Mojang,
-} = require("minecraft-java-core");
+} = require("@fitzxel/minecraft-java-core");
 const prompt = require("prompt");
 const launcher = new Launch();
 
