@@ -1,14 +1,30 @@
 import http from "http";
+import { join } from "path";
+import { readFileSync } from "fs";
 
-module.exports = function (port: number, url: string) {
+module.exports = function (port: number, url: string, content: string) {
   return new Promise<string>((resolve) => {
     const server = http.createServer(async (req, res) => {
       if (req.url.includes("?")) {
         const code = new URLSearchParams(
           req.url.substr(req.url.indexOf("?") + 1),
         ).get("code");
-        res.writeHead(200, { "Content-Type": "text/plain" });
-        res.end("You can close this window now.");
+
+        try {
+          if (content) {
+            res.writeHead(200, { "Content-Type": "text/html" });
+            res.end(content);
+          } else {
+            const file = readFileSync(
+              join(process.cwd(), "assets", "server", "index.html"),
+            );
+            res.writeHead(200, { "Content-Type": "text/html" });
+            res.end(file);
+          }
+        } catch (err) {
+          res.writeHead(200, { "Content-Type": "text/plain" });
+          res.end("You can close this window now.");
+        }
 
         server.close();
         clearTimeout(timeout);

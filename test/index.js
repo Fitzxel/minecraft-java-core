@@ -11,6 +11,7 @@ const fs = require("fs");
 const accJson = "./test/account.json";
 let mc;
 
+// this logging test gonna fail with this client_id if secret is empty or invalid
 const client_id = "7ae13d13-d132-462b-8619-bfb13246a563";
 const client_secret = "";
 

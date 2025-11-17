@@ -130,12 +130,14 @@ export default class Microsoft {
    *
    * @param type The environment to open the OAuth window. Defaults to the auto-detected type.
    * @param url  The full OAuth2 authorization URL. If not provided, a default is used.
+   * @param content  A string representing the HTML content to be delivered in the redirect after successful login. (only raw mode)
    * @returns    An object with user data on success, or false if canceled.
    */
   public async getAuth(
     type?: MicrosoftClientType,
     port?: number,
     urlCallback?: (url: string) => void,
+    content?: string,
   ): Promise<AuthResponse | AuthError | false> {
     const finalType = type || this.type;
     if (finalType === "raw") this.redirect = `http://localhost:${port || 8888}`;
@@ -155,7 +157,7 @@ export default class Microsoft {
         userCode = await require("./GUI/Terminal.js")(finalUrl);
         break;
       case "raw":
-        userCode = await require("./GUI/Raw.js")(port, finalUrl);
+        userCode = await require("./GUI/Raw.js")(port, finalUrl, content);
         break;
       default:
         return false;
