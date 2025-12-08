@@ -16,7 +16,7 @@ module.exports = function (port: number, url: string, content: string) {
             res.end(content);
           } else {
             const file = readFileSync(
-              join(process.cwd(), "assets", "server", "index.html"),
+              join(__dirname, "../../../assets/server/index.html"),
             );
             res.writeHead(200, { "Content-Type": "text/html" });
             res.end(file);
