@@ -12,6 +12,7 @@
         ],
         "declaration": true,
         "outDir": "build",
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "skipLibCheck": true
     }
 }
