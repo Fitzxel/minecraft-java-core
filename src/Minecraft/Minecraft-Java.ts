@@ -314,6 +314,9 @@ export default class JavaDownloader extends EventEmitter {
           message: "Java executable not found after extraction",
         };
       }
+
+      // Remove the downloaded archive
+      fs.unlinkSync(path.join(pathFolder, packageName));
     }
 
     return { files: [], path: javaExePath };
@@ -379,7 +382,7 @@ export default class JavaDownloader extends EventEmitter {
 
       // Relay progress events
       download.on("progress", (downloaded: number, size: number) => {
-        this.emit("progress", downloaded, size, fileName);
+        this.emit("progress", downloaded, size, "Java");
       });
 
       // Start download
