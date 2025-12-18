@@ -1,6 +1,6 @@
 {
   "name": "@fitzxel/minecraft-java-core",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "types": "./build/Index.d.ts",
   "exports": {
     ".": {
