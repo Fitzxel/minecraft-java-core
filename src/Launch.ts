@@ -338,10 +338,10 @@ export default class Launch extends EventEmitter {
 
     let gameLibraries: any = await libraries.Getlibraries(json);
     let gameAssetsOther: any = await libraries.GetAssetsOthers(
-      this.options.url,
+      this.options.url
     );
     let gameAssets: any = await new assetsMinecraft(this.options).getAssets(
-      json,
+      json
     );
     let gameJava: any = this.options.java.path
       ? { files: [] }
@@ -380,7 +380,7 @@ export default class Launch extends EventEmitter {
         filesList,
         totsize,
         this.options.downloadFileMultiple,
-        this.options.timeout,
+        this.options.timeout
       );
     }
 
@@ -406,7 +406,7 @@ export default class Launch extends EventEmitter {
       let jsonLoader = await loaderInstall
         .GetLoader(
           version,
-          this.options.java.path ? this.options.java.path : gameJava.path,
+          this.options.java.path ? this.options.java.path : gameJava.path
         )
         .then((data: any) => data)
         .catch((err: any) => err);
@@ -455,12 +455,12 @@ export default class Launch extends EventEmitter {
       data;
 
     let minecraftArguments: any = await new argumentsMinecraft(
-      this.options,
+      this.options
     ).GetArguments(minecraftJson, minecraftLoader);
     if (minecraftArguments.error) return this.emit("error", minecraftArguments);
 
     let loaderArguments: any = await new loaderMinecraft(
-      this.options,
+      this.options
     ).GetArguments(minecraftLoader, minecraftVersion);
     if (loaderArguments.error) return this.emit("error", loaderArguments);
 
@@ -484,19 +484,19 @@ export default class Launch extends EventEmitter {
     let argumentsLogs: string = Arguments.join(" ");
     argumentsLogs = argumentsLogs.replaceAll(
       this.options.authenticator?.access_token,
-      "????????",
+      "????????"
     );
     argumentsLogs = argumentsLogs.replaceAll(
       this.options.authenticator?.client_token,
-      "????????",
+      "????????"
     );
     argumentsLogs = argumentsLogs.replaceAll(
       this.options.authenticator?.uuid,
-      "????????",
+      "????????"
     );
     argumentsLogs = argumentsLogs.replaceAll(
       this.options.authenticator?.xboxAccount?.xuid,
-      "????????",
+      "????????"
     );
     argumentsLogs = argumentsLogs.replaceAll(`${this.options.path}/`, "");
     this.emit("data", `Launching with arguments ${argumentsLogs}`);
@@ -506,10 +506,10 @@ export default class Launch extends EventEmitter {
       detached: this.options.detached,
     });
     minecraftDebug.stdout.on("data", (data) =>
-      this.emit("data", data.toString("utf-8")),
+      this.emit("data", data.toString("utf-8"))
     );
     minecraftDebug.stderr.on("data", (data) =>
-      this.emit("data", data.toString("utf-8")),
+      this.emit("data", data.toString("utf-8"))
     );
     minecraftDebug.on("close", (code) => this.emit("close", code));
 
